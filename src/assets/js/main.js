@@ -246,15 +246,16 @@ class UIComponents {
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.textContent = message;
+        const colorMap = { success: 'var(--color-success)', error: 'var(--color-danger)', info: 'var(--color-info)' };
         notification.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
             padding: 1rem 1.5rem;
-            background-color: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-            color: white;
+            background-color: ${colorMap[type] || colorMap.info};
+            color: #ffffff;
             border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-lg);
             z-index: 9999;
             animation: slideIn 0.3s ease-out;
         `;
@@ -280,7 +281,7 @@ class UIComponents {
                             type="email" 
                             name="email" 
                             required 
-                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.375rem; font-size: 1rem;"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-input-border); border-radius: 0.375rem; font-size: 1rem; background: var(--color-input-bg); color: var(--color-text-primary);"
                         />
                     </div>
                     <div style="margin-bottom: 1.5rem;">
@@ -291,7 +292,7 @@ class UIComponents {
                             type="password" 
                             name="password" 
                             required 
-                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.375rem; font-size: 1rem;"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-input-border); border-radius: 0.375rem; font-size: 1rem; background: var(--color-input-bg); color: var(--color-text-primary);"
                         />
                     </div>
                     <div style="display: flex; gap: 1rem;">
@@ -328,7 +329,7 @@ class UIComponents {
                             type="text" 
                             name="username" 
                             required 
-                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.375rem; font-size: 1rem;"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-input-border); border-radius: 0.375rem; font-size: 1rem; background: var(--color-input-bg); color: var(--color-text-primary);"
                         />
                     </div>
                     <div style="margin-bottom: 1rem;">
@@ -339,7 +340,7 @@ class UIComponents {
                             type="email" 
                             name="email" 
                             required 
-                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.375rem; font-size: 1rem;"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-input-border); border-radius: 0.375rem; font-size: 1rem; background: var(--color-input-bg); color: var(--color-text-primary);"
                         />
                     </div>
                     <div style="margin-bottom: 1.5rem;">
@@ -351,7 +352,7 @@ class UIComponents {
                             name="password" 
                             required 
                             minlength="8"
-                            style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.375rem; font-size: 1rem;"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-input-border); border-radius: 0.375rem; font-size: 1rem; background: var(--color-input-bg); color: var(--color-text-primary);"
                         />
                     </div>
                     <div style="display: flex; gap: 1rem;">
@@ -480,10 +481,75 @@ function updateUIForAuth() {
 }
 
 // ===================================
+// Theme Manager
+// ===================================
+class ThemeManager {
+    constructor() {
+        this.STORAGE_KEY = 'blt-theme';
+        this.darkClass = 'dark';
+        this.transitionClass = 'dark-transition';
+    }
+
+    init() {
+        const saved = localStorage.getItem(this.STORAGE_KEY);
+        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add(this.darkClass);
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem(this.STORAGE_KEY)) {
+                this.setTheme(e.matches ? 'dark' : 'light', false);
+            }
+        });
+
+        this.bindToggle();
+    }
+
+    bindToggle() {
+        const toggleBtn = document.getElementById('themeToggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => this.toggle());
+        }
+    }
+
+    toggle() {
+        const isDark = document.documentElement.classList.contains(this.darkClass);
+        this.setTheme(isDark ? 'light' : 'dark', true);
+    }
+
+    setTheme(theme, persist) {
+        document.documentElement.classList.add(this.transitionClass);
+
+        if (theme === 'dark') {
+            document.documentElement.classList.add(this.darkClass);
+        } else {
+            document.documentElement.classList.remove(this.darkClass);
+        }
+
+        if (persist) {
+            localStorage.setItem(this.STORAGE_KEY, theme);
+        }
+
+        setTimeout(() => {
+            document.documentElement.classList.remove(this.transitionClass);
+        }, 350);
+    }
+
+    isDark() {
+        return document.documentElement.classList.contains(this.darkClass);
+    }
+}
+
+const themeManager = new ThemeManager();
+
+// ===================================
 // Initialization
 // ===================================
 async function init() {
     console.log('🚀 BLT initialized');
+
+    // Initialize theme
+    themeManager.init();
 
     // Check authentication status
     await auth.checkAuth();
@@ -529,6 +595,7 @@ window.bltApp = {
     state,
     api,
     auth,
+    themeManager,
 };
 
 window.uiComponents = UIComponents;

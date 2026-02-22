@@ -249,7 +249,7 @@ async def handle_bugs_list(request, env=None):
 
             # Mock success response in HTML for HTMX
             html = """
-                <div style="background: #ecfdf5; color: #065f46; padding: 2rem; border-radius: 0.5rem; text-align: center; border: 1px solid #10b981;">
+                <div style="background: var(--color-bg-alt); color: var(--color-text-primary); padding: 2rem; border-radius: 0.5rem; text-align: center; border: 1px solid var(--color-success);">
                     <h2 style="margin-bottom: 1rem;">✅ Report Submitted!</h2>
                     <p>Thank you for contributing to OWASP BLT. Our team will review your report shortly.</p>
                     <a href="/" class="btn btn-primary" style="margin-top: 1.5rem; display: inline-block;">Back to Home</a>

@@ -13,6 +13,16 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 
+    <!-- Theme initialization (prevents flash of wrong theme) -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('blt-theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
     <!-- Preload critical assets -->
     <link rel="preload" href="assets/css/main.css" as="style">
     <link rel="preload" href="assets/js/main.js" as="script">
@@ -24,6 +34,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -51,7 +62,7 @@
 
 <body>
     <!-- Header Component -->
-    <header class="sticky top-0 z-50 bg-white border-b border-gray-200" role="banner">
+    <header class="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700" role="banner">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav class="flex items-center justify-between py-4" role="navigation" aria-label="Main navigation">
                 <div class="flex items-center">
@@ -60,19 +71,23 @@
                     </a>
                 </div>
                 <ul class="hidden md:flex space-x-8 items-center list-none">
-                    <li><a href="/" class="text-gray-700 font-medium hover:text-primary transition-colors">Home</a></li>
+                    <li><a href="/" class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">Home</a></li>
                     <li><a href="pages/report-bug.html"
-                            class="text-gray-700 font-medium hover:text-primary transition-colors">Report Bug</a></li>
+                            class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">Report Bug</a></li>
                     <li><a href="pages/leaderboard.html"
-                            class="text-gray-700 font-medium hover:text-primary transition-colors">Leaderboard</a></li>
+                            class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">Leaderboard</a></li>
                     <li><a href="pages/projects.html"
-                            class="text-gray-700 font-medium hover:text-primary transition-colors">Projects</a></li>
+                            class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">Projects</a></li>
                     <li><a href="pages/about.html"
-                            class="text-gray-700 font-medium hover:text-primary transition-colors">About</a></li>
+                            class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">About</a></li>
                 </ul>
-                <div class="flex space-x-4">
+                <div class="flex space-x-4 items-center">
+                    <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+                        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+                    </button>
                     <button
-                        class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md font-medium transition-colors"
+                        class="px-4 py-2 text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-md font-medium transition-colors"
                         id="loginBtn">Login</button>
                     <button
                         class="px-4 py-2 text-white bg-primary hover:bg-primary-dark rounded-md font-medium transition-colors"
@@ -85,14 +100,14 @@
     <!-- Main Content -->
     <main class="main" role="main">
         <!-- Hero Section -->
-        <section class="py-20 bg-gradient-to-br from-gray-50 to-white">
+        <section class="py-20 bg-gradient-to-br from-gray-50 to-white dark:from-slate-900 dark:to-slate-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-3xl mx-auto">
-                    <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
+                    <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-slate-100 mb-6 tracking-tight">
                         Bug Logging Made <span class="text-primary">Simple</span>, Rewarding, and <span
                             class="text-primary">Fun</span>
                     </h1>
-                    <p class="text-xl text-gray-600 mb-10 leading-relaxed">
+                    <p class="text-xl text-gray-600 dark:text-slate-400 mb-10 leading-relaxed">
                         Join the global community of security researchers, developers, and testers.
                         Report bugs, earn rewards, and help make the internet more secure.
                     </p>
