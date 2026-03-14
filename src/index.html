@@ -2,66 +2,252 @@
 <html lang="en" class="">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OWASP BLT — Bug Logging Tool</title>
-  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }, colors: { primary: { DEFAULT: '#E10101', dark: '#BC0000' } } } }
-    }
-  </script>
-  <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
-  <script src="assets/js/main.js" type="module" defer></script>
-  <style>body { font-family: 'Inter', system-ui, sans-serif; }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="OWASP BLT - Bug Logging Tool: A gamified, crowd-sourced QA and vulnerability disclosure platform">
+    <meta name="keywords" content="OWASP, BLT, bug bounty, security, vulnerability, bug tracking">
+    <title>OWASP BLT - Bug Logging Tool</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <!-- Theme initialization (prevents flash of wrong theme) -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('blt-theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
+    <!-- Preload critical assets -->
+    <link rel="preload" href="assets/css/main.css" as="style">
+    <link rel="preload" href="assets/js/main.js" as="script">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/main.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#E10101',
+                            dark: '#BC0000',
+                        },
+                        secondary: '#64748b',
+                        owasp: '#000000',
+                        gray: {
+                            200: '#E5E5E5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- HTMX for dynamic interactions -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+
+    <!-- Main application script -->
+    <script src="assets/js/main.js" type="module" defer></script>
 </head>
 
-<body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased transition-colors">
-
-  <!-- ===== NAVBAR ===== -->
-  <header class="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-[#E5E5E5] dark:border-gray-800 transition-colors" role="banner">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <nav class="flex items-center justify-between h-16" role="navigation" aria-label="Main navigation">
-        <a href="index.html" class="flex items-center">
-          <img src="assets/img/logo-lg.png" alt="OWASP BLT Logo" class="h-8 w-auto">
-        </a>
-        <ul class="hidden md:flex items-center gap-1 list-none m-0 p-0">
-          <li><a href="index.html" class="px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 rounded-md bg-red-50 dark:bg-gray-800">Home</a></li>
-          <li><a href="pages/report-bug.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors">Report Bug</a></li>
-          <li><a href="pages/leaderboard.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors">Leaderboard</a></li>
-          <li><a href="pages/projects.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors">Projects</a></li>
-          <li><a href="pages/about.html" class="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors">About</a></li>
-        </ul>
-        <div class="hidden md:flex items-center gap-2">
-          <button id="themeToggle" class="p-2 text-gray-500 dark:text-gray-400 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle theme">
-            <i class="fa-solid fa-sun dark:hidden text-sm" aria-hidden="true"></i>
-            <i class="fa-solid fa-moon hidden dark:block text-sm" aria-hidden="true"></i>
-          </button>
-          <button id="loginBtn" class="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded-md hover:bg-red-600 hover:text-white transition-colors">Login</button>
-          <button id="signupBtn" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Sign Up</button>
+<body>
+    <!-- Header Component -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700" role="banner">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex items-center justify-between py-4" role="navigation" aria-label="Main navigation">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center text-xl font-bold text-primary">
+                        <span>OWASP BLT</span>
+                    </a>
+                </div>
+                <ul class="hidden md:flex space-x-8 items-center list-none">
+                    <li><a href="/" class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">Home</a></li>
+                    <li><a href="pages/report-bug.html"
+                            class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">Report Bug</a></li>
+                    <li><a href="pages/leaderboard.html"
+                            class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">Leaderboard</a></li>
+                    <li><a href="pages/projects.html"
+                            class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">Projects</a></li>
+                    <li><a href="pages/about.html"
+                            class="text-gray-700 dark:text-slate-300 font-medium hover:text-primary transition-colors">About</a></li>
+                </ul>
+                <div class="flex space-x-4 items-center">
+                    <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+                        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+                    </button>
+                    <button
+                        class="px-4 py-2 text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-md font-medium transition-colors"
+                        id="loginBtn">Login</button>
+                    <button
+                        class="px-4 py-2 text-white bg-primary hover:bg-primary-dark rounded-md font-medium transition-colors"
+                        id="signupBtn">Sign Up</button>
+                </div>
+            </nav>
         </div>
-        <button class="md:hidden p-2 text-gray-600 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800" id="mobileMenuBtn" aria-label="Open menu">
-          <i class="fa-solid fa-bars text-base" aria-hidden="true"></i>
-        </button>
-      </nav>
-      <div id="mobileMenu" class="hidden md:hidden pb-4 border-t border-[#E5E5E5] dark:border-gray-800 dark:bg-gray-900">
-        <ul class="flex flex-col gap-1 pt-3 list-none m-0 p-0">
-          <li><a href="index.html" class="block px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 rounded-md bg-red-50 dark:bg-gray-800">Home</a></li>
-          <li><a href="pages/report-bug.html" class="block px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors">Report Bug</a></li>
-          <li><a href="pages/leaderboard.html" class="block px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors">Leaderboard</a></li>
-          <li><a href="pages/projects.html" class="block px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors">Projects</a></li>
-          <li><a href="pages/about.html" class="block px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-md hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors">About</a></li>
-        </ul>
-        <div class="flex gap-3 mt-3">
-          <button class="flex-1 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded-md hover:bg-red-600 hover:text-white transition-colors">Login</button>
-          <button class="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Sign Up</button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main" role="main">
+        <!-- Hero Section -->
+        <section class="py-20 bg-gradient-to-br from-gray-50 to-white dark:from-slate-900 dark:to-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-slate-100 mb-6 tracking-tight">
+                        Bug Logging Made <span class="text-primary">Simple</span>, Rewarding, and <span
+                            class="text-primary">Fun</span>
+                    </h1>
+                    <p class="text-xl text-gray-600 dark:text-slate-400 mb-10 leading-relaxed">
+                        Join the global community of security researchers, developers, and testers.
+                        Report bugs, earn rewards, and help make the internet more secure.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <a href="pages/report-bug.html"
+                            class="px-8 py-4 text-white bg-primary hover:bg-primary-dark rounded-lg font-bold text-lg transition-all transform hover:scale-105 shadow-lg shadow-primary/25">
+                            Report a Bug
+                        </a>
+                        <a href="pages/about.html"
+                            class="px-8 py-4 text-primary bg-transparent border-2 border-primary hover:bg-primary hover:text-white rounded-lg font-bold text-lg transition-all transform hover:scale-105">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <h2 class="section-title">Why Choose BLT?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🐛</div>
+                        <h3 class="feature-title">Easy Bug Reporting</h3>
+                        <p class="feature-description">
+                            Report bugs and vulnerabilities with our intuitive interface.
+                            From simple UI bugs to critical security issues.
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🏆</div>
+                        <h3 class="feature-title">Gamification & Rewards</h3>
+                        <p class="feature-description">
+                            Earn points, badges, and climb the leaderboard.
+                            Get rewarded for your contributions to internet security.
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3 class="feature-title">Bug Bounties</h3>
+                        <p class="feature-description">
+                            Participate in bug bounty programs and earn real rewards.
+                            Companies can launch their own bounty programs.
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌍</div>
+                        <h3 class="feature-title">Global Community</h3>
+                        <p class="feature-description">
+                            Join thousands of security researchers and developers worldwide.
+                            Collaborate, learn, and grow together.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section (Dynamic content loaded via HTMX) -->
+        <section class="stats">
+            <div class="container">
+                <h2 class="section-title">Our Impact</h2>
+                <div class="stats-grid" hx-get="/api/stats" hx-trigger="load" hx-swap="innerHTML">
+                    <!-- Stats will be loaded dynamically -->
+                    <div class="stat-card">
+                        <div class="stat-value">Loading...</div>
+                        <div class="stat-label">Bugs Reported</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Loading...</div>
+                        <div class="stat-label">Active Researchers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Loading...</div>
+                        <div class="stat-label">Rewards Distributed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Loading...</div>
+                        <div class="stat-label">Projects Protected</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h2 class="cta-title">Ready to Get Started?</h2>
+                    <p class="cta-subtitle">
+                        Join the OWASP BLT community today and start making a difference.
+                    </p>
+                    <div class="cta-actions">
+                        <button class="btn btn-primary btn-lg" id="ctaSignupBtn">Create Account</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Component -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3 class="footer-title">OWASP BLT</h3>
+                    <p class="footer-description">
+                        An open-source, community-driven bug logging and vulnerability disclosure platform.
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h3 class="footer-title">Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="pages/about.html">About</a></li>
+                        <li><a href="pages/docs.html">Documentation</a></li>
+                        <li><a href="https://github.com/OWASP-BLT/BLT-Next">GitHub</a></li>
+                        <li><a href="pages/contribute.html">Contribute</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3 class="footer-title">Community</h3>
+                    <ul class="footer-links">
+                        <li><a href="https://owasp.org">OWASP</a></li>
+                        <li><a href="pages/leaderboard.html">Leaderboard</a></li>
+                        <li><a href="pages/projects.html">Projects</a></li>
+                        <li><a href="pages/contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3 class="footer-title">Legal</h3>
+                    <ul class="footer-links">
+                        <li><a href="pages/privacy.html">Privacy Policy</a></li>
+                        <li><a href="pages/terms.html">Terms of Service</a></li>
+                        <li><a href="https://github.com/OWASP-BLT/BLT-Next/blob/main/LICENSE">License</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 OWASP BLT. Licensed under AGPL-3.0.</p>
+            </div>
         </div>
       </div>
     </div>
